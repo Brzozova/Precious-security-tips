@@ -74,8 +74,22 @@ $ curl -H "Cookie: logged_in=true; admin=true" http://<domain_name>/cookie-test
 When cookie is a hash value use:
 * Hashing decryptor -> https://crackstation.net/
 
+---
 
+# IDOR - Insecure Direct Object Reference
 
+* access control vulnerability
+* able to view the other users' content using their Id number while still being logged in with a different account (or not logged in at all)
+* can occur when a web server receives user-supplied input to retrieve objects (files, data, documents), too much trust has been placed on the input data, 
+  and it is not validated on the server-side to confirm the requested object belongs to the user requesting it
+ 
+### Examples
+
+1. Create two accounts and swap the Id numbers between them.
+2. Changing User ID in url to get access to other account details
+```
+http://<domain_name>/profile?user_id=1000
+```
 
 
 
