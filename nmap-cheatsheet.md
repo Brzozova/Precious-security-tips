@@ -147,7 +147,58 @@
   ```
   $ sudo nmap -sU
   ```
+---
+### Scans behinde the firewall
+
+A stateless firewall will check if the incoming packet has the SYN flag set to detect a connection attempt. 
+Using a flag combination that does not match the SYN packet makes it possible to deceive the firewall and reach the system behind it.
+A stateful firewall will practically block all such crafted packets and render this kind of scan useless.
+
+### Null Scan
+
+ * does not set any flag
+ * all six flag bits are set to zero
+ * lack of reply in a null scan indicates that either the port is open or a firewall is blocking the packet
+ * Port is open:
+   NULL -> No response
+ * Port is clodes:
+   NULL <- RST/ACK
+   
+   ```
+   $ sudo nmap -sN
+   ```
  
+ *NOTE: Because the null scan relies on the lack of a response to infer that the port is not closed, 
+ it cannot indicate with certainty that these ports are open; there is a possibility that the ports 
+ are not responding due to a firewall rule.*
+
+### FIN scan
+
+ * TCP packet with the FIN flag set
+
+ * Port is open:
+   FIN -> No response
+ * Port is clodes:
+   FIN <- RST/ACK
+   
+   ```
+   $ sudo nmap -sF
+   ```
+  *NOTE: Some firewalls will 'silently' drop the traffic without sending an RST*
+
+### Xmas scan
+ 
+ * Sets the FIN, PSH, and URG flags simultaneously
+
+ * Port is open:
+   FIN/PSH/URG -> No response
+ * Port is clodes:
+   FIN/PSH/URG <- RST/ACK
+   
+   ```
+   $ sudo nmap -sX
+   ```
+
 ---
 #### Subnet scanning
 ```
@@ -163,7 +214,7 @@ Nmap, by default, uses a ping scan to find live hosts, then proceeds to scan liv
 $ nmap -sn TARGETS
 ```
 ---
-### Useful Nmap flags
+## Useful Nmap flags
 
 -n - don't send DNS queries
 -R - query the DNS server even for offline hosts
