@@ -232,7 +232,90 @@ To set SYN, RST, and FIN simultaneously:
 $ nmap --scanflags RSTSYNFIN
 ```
 
+---
+## IP SPOOTING
 
+It requires you to be in a position where you can monitor the traffic. 
+
+Process:
+1. Attacker sends a packet with a spoofed source IP address to the target machine.
+2. Target machine replies to the spoofed IP address as the destination.
+3. Attacker captures the replies to figure out open ports.
+
+
+```
+$ nmap -S SPOOFED_IP MACHINE_IP
+```
+
+Define network interface to use (-e) and not to expect to receive a ping reply (-Pn)
+```
+$ nmap -e NET_INTERFACE -Pn -S SPOOFED_IP MACHINE_IP
+```
+
+## MAC spoofing
+
+It requires you to be in a position where you can monitor the traffic.
+
+When you are on the same subnet as the target machine, you would be able to spoof your MAC address.
+This address spoofing is only possible if the attacker and the target machine are on the same Ethernet (802.3) network or same WiFi (802.11).
+
+```
+--spoof-mac SPOOFED_MAC
+```
+
+## Decoy
+
+Make the scan appears to be coming from many IP addresses so that the attacker’s IP address would be lost among them.
+
+
+```
+$ nmap -D 10.10.0.1,10.10.0.2,ME MACHINE_IP
+```
+
+-D - specifying a specific or random IP address
+ME - indicate that your IP address should appear in the third order
+
+```
+$ nmap -D 10.10.0.1,10.10.0.2,RND,RND,ME MACHINE_IP
+```
+RND - source IP addresses are assigned randomly
+
+---
+## Fragmented Packets
+
+
+-f - fragment packets, the IP data will be divided into 8 bytes or less
+-f -f or -ff - will split the data into 16 byte-fragments
+--mtu - change the default value, choose a multiple of 8
+
+
+*Note: If you added -ff (or -f -f), the fragmentation of the data will be multiples of 16. In other words, the 24 bytes of the TCP header, in this case, would be divided over two IP fragments, the first containing 16 bytes and the second containing 8 bytes of the TCP header.*
+
+Q: If the TCP segment has a size of 64, and -ff option is being used, how many IP fragments will you get? A: 4
+
+---
+## Zombie/IDLE scan
+
+Nmap will make each probe appear as if coming from the idle (zombie) host, then it will check for indicators whether the idle (zombie) host received any response to the spoofed probe. 
+This is accomplished by checking the IP identification (IP ID) value in the IP header. 
+
+Process:
+1. Trigger the idle host to respond so that you can record the current IP ID on the idle host.
+2. Send a SYN packet to a TCP port on the target. The packet should be spoofed to appear as if it was coming from the idle host (zombie) IP address.
+3. Trigger the idle machine again to respond so that you can compare the new IP ID with the one received earlier.
+
+```
+$ nmap -sI ZOMBIE_IP MACHINE_IP
+```
+ZOMBIE_IP - the IP address of the idle host 
+
+
+
+---
+## How to be less visible using Nmap?
+
+* Use fragmented packets
+* Use decoy
 
 ---
 #### Subnet scanning
@@ -251,17 +334,90 @@ $ nmap -sn TARGETS
 ---
 ## Useful Nmap flags
 
--n - don't send DNS queries
--R - query the DNS server even for offline hosts
---dns-servers <dns_address> - use a specific DNS server
+-A	- equivalent to -sV -O -sC --traceroute\b
 
--p-	- all ports
--p1-1023 - scan ports 1 to 1023
--F	- 100 most common ports
--r	- scan ports in consecutive order
--T<0-5>	-T0 - being the slowest and T5 the fastest
---max-rate 50	- rate <= 50 packets/sec
---min-rate 15	- rate >= 15 packets/sec
---min-parallelism 100	- at least 100 probes in parallel
+-n - don't send DNS queries\b
+-R - query the DNS server even for offline hosts\b
+--dns-servers <dns_address> - use a specific DNS server\b
+
+-p-	- all ports\b
+-p1-1023 - scan ports 1 to 1023\b
+-F	- 100 most common ports\b
+-r	- scan ports in consecutive order\b
+-T<0-5>	-T0 - being the slowest and T5 the fastest\b
+--max-rate 50	- rate <= 50 packets/sec\b
+--min-rate 15	- rate >= 15 packets/sec\b
+--min-parallelism 100	- at least 100 probes in parallel\b
+
+## Flags to get more details
+--reason - gives us the explicit reason why Nmap concluded that the system is up or a particular port is open. 
+
+Host is up, received arp-response - system is considered online
+“syn-ack” - port is open
+
+-vv - verbose\b
+-dd - debugging mode\b
+
+## Output flags
+
+-oN - normal, like in terminal\b
+-oG - grepable\b
+-oX - XML\b
+
+
+---
+# Services detection
+
+-sV - collect and determine service and version information for the open ports\b
+--version-intensity LEVEL - where the level ranges between 0, the lightest, and 9, the most complete\b
+-sV --version-light - an intensity of 2\b
+-sV --version-all - an intensity of 9\b
+
+*Note: It is important to note that using -sV will force Nmap to proceed with the TCP 3-way handshake and establish the connection. \b
+The connection establishment is necessary because Nmap cannot discover the version without establishing a connection fully and communicating with the listening service. In other words, stealth SYN scan -sS is not possible when -sV option is chosen.*
+
+
+-O
+--traceroute - find the routers between you and the target
+```
+$ nmap -sS --traceroute <IP>
+```
+
+*Note: Standard traceroute starts with a packet of low TTL (Time to Live) and keeps increasing until it reaches the target. Nmap’s traceroute starts with a packet of high TTL and keeps decreasing it.*
+
+
+#### Case
+
+Command: 
+```
+$ nmap -sS --traceroute <IP>
+```
+Output: 
+```
+TRACEROUTE
+HOP RTT     ADDRESS
+1   1.48 ms MACHINE_IP
+```
+Effect:
+There are no routers/hops between the two as they are connected directly.\b
+Many routers are configured not to send ICMP Time-to-Live exceeded, which would prevent us from discovering their IP addresses.
+
+---
+## Nmap Scripting Engine
+
+Nmap Scripting Engine (NSE) is a Lua interpreter that allows Nmap to execute Nmap scripts written in Lua language.\b
+Scripts to use are located under the path `/usr/share/nmap/scripts`, but you can install other user’s scripts and use them for your scans.
+
+Specify the script by name using --script "SCRIPT-NAME" or a pattern such as --script "ftp*"
+
+```
+$ sudo nmap -sS -n --script "http-date" <IP>
+```
+`http-date` - retrieve the http server date and time
+
+
+
+
+
 
 
