@@ -200,6 +200,41 @@ A stateful firewall will practically block all such crafted packets and render t
    ```
 
 ---
+ACK scan and the window scan were very efficient at helping us map out the firewall rules.\b
+It is vital to remember that just because a firewall is not blocking a specific port, \b
+it does not necessarily mean that a service is listening on that port. \b
+There is a possibility that the firewall rules need to be updated to reflect recent service changes. \b
+ACK and window scans are exposing the firewall rules, not the services.\b
+
+### TCP ACK scan
+
+ * Send a TCP packet with the ACK flag set
+ * Checking ACK packets resulted in responses, you will learn which ports were not blocked by the firewall.
+ * This type of scan is more suitable to discover firewall rule sets and configuration
+ 
+ ```
+ $ sudo nmap -sA
+ ```
+
+### TCP window scan
+ 
+ * Like the ACK scan, but it examines the TCP Window field of the RST packets returned
+
+ ```
+ $ sudo nmap -sW
+ ```
+
+### Custom scan
+
+Example:
+To set SYN, RST, and FIN simultaneously:
+```
+$ nmap --scanflags RSTSYNFIN
+```
+
+
+
+---
 #### Subnet scanning
 ```
 $ nmap -sL -n 10.10.12.13/29
