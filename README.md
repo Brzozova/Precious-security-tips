@@ -9,9 +9,11 @@ This is a collection of commands, tools, case studies, ideas useful for people i
 * Sublist3r
 * dirb
 * gobuster
+* hashcat
 
 ### Subjects
 * Accounts takeover
 * Network scanning
 * OSINT
+* Hashes cracking
 * and much more!
