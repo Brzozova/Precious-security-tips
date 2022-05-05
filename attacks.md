@@ -41,4 +41,40 @@ Mitigation:
 * Two-Factor Authentication - Ask the user to provide a code available via eg. email, SMS, Google Authenticator.
 * IP-based geolocation
 
+---
+## Path Traversal attack (Directory traversal/dot-dot-slash attack), LFI, RFI
+
+Allows an attacker to read operating system resources, such as local files on the server running an application
+
+Mitigation for file inclusion vulnerabilities:
+* Keep system and services, including web application frameworks, updated with the latest version.
+* Turn off PHP errors to avoid leaking the path of the application and other potentially revealing information.
+* A Web Application Firewall (WAF) is a good option to help mitigate web application attacks.
+* Disable some PHP features that cause file inclusion vulnerabilities if your web app doesn't need them, such as allow_url_fopen on and allow_url_include.
+* Carefully analyze the web application and allow only protocols and PHP wrappers that are in need.
+* Never trust user input, and make sure to implement proper input validation against file inclusion.
+* Implement whitelisting for file names and locations as well as blacklisting.
+
+
+---
+## SSRF (Server-Side Request Forgery)
+
+Allows a malicious user to cause the webserver to make an additional or edited HTTP request to the resource of the attacker's choosing.
+
+### Types
+
+* Regular SSRF - data is returned to the attacker's screen.
+* Blind SSRF - vulnerability where an SSRF occurs, but no information is returned to the attacker's screen.
+
+Results:
+* Access to unauthorised areas.
+* Access to customer/organisational data.
+* Ability to Scale to internal networks.
+* Reveal authentication tokens/credentials.
+
+
+
+
+
+
 
