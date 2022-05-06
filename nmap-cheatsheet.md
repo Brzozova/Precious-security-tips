@@ -150,9 +150,15 @@
 ---
 ### Scans behinde the firewall
 
-A stateless firewall will check if the incoming packet has the SYN flag set to detect a connection attempt. 
-Using a flag combination that does not match the SYN packet makes it possible to deceive the firewall and reach the system behind it.
-A stateful firewall will practically block all such crafted packets and render this kind of scan useless.
+#### Firewall evasion. 
+
+Many firewalls are configured to drop incoming TCP packets to blocked ports which have the SYN flag set (thus blocking new connection initiation requests). By sending requests which do not contain the SYN flag, we effectively bypass this kind of firewall. Whilst this is good in theory, most modern IDS solutions are savvy to these scan types.
+
+* A stateless firewall will check if the incoming packet has the SYN flag set to detect a connection attempt. 
+* A stateful firewall will practically block all such crafted packets and render this kind of scan useless.
+
+*Note: RFC 793 mandates that network hosts respond to malformed packets with a RST TCP packet for closed ports, and don't respond at all for open ports; this is not always the case in practice. In particular Microsoft Windows (and a lot of Cisco network devices) are known to respond with a RST to any malformed TCP packet -- regardless of whether the port is actually open or not. This results in all ports showing up as being closed.*
+
 
 ### Null Scan
 
@@ -198,6 +204,8 @@ A stateful firewall will practically block all such crafted packets and render t
    ```
    $ sudo nmap -sX
    ```
+
+
 
 ---
 ACK scan and the window scan were very efficient at helping us map out the firewall rules.\b
@@ -314,8 +322,19 @@ ZOMBIE_IP - the IP address of the idle host
 ---
 ## How to be less visible using Nmap?
 
-* Use fragmented packets
-* Use decoy
+#### Firewalls bypassing
+* Use stealth scans like NULL, XMAS & FIN scans (but not always good solution)
+* Use -Pn flag which means don't pinging the host before scanning. It treats the target host as being alive, bypassing the ICMP block.
+  It takes more time, as Nmap will scan 2 times every port even when it's a dead one.
+  *Note: Windows hosts by deafult blocks ICMP on firewall.*
+* Use packets fragmentation (-f) - making it less likely that the packets will be detected by a firewall or IDS.
+* Define size of fragmented packets (--mtu <number>) - accepts a maximum transmission unit size to use for the packets sent. This must be a multiple of 8.
+* Use --scan-delay <time>ms flag used to add a delay between packets sent. This is very useful if the network is unstable, but also for evading any time-   based firewall/IDS triggers which may be in place.
+* Use --badsum flag used to generate in invalid checksum for packets. Any real TCP/IP stack would drop this packet, however, firewalls may potentially       respond automatically, without bothering to check the checksum of the packet. Switch can be used to determine the presence of firewall or IDS.
+* Use decoy (-D)
+  
+More -> https://nmap.org/book/man-bypass-firewalls-ids.html
+
 
 ---
 #### Subnet scanning
@@ -348,6 +367,9 @@ $ nmap -sn TARGETS
 --max-rate 50	- rate <= 50 packets/sec\b
 --min-rate 15	- rate >= 15 packets/sec\b
 --min-parallelism 100	- at least 100 probes in parallel\b
+
+*The -sn switch tells Nmap not to scan any ports -- forcing it to rely primarily on ICMP echo packets (or ARP requests on a local network, if run with sudo or directly as the root user) to identify targets. In addition to the ICMP echo requests, the -sn switch will also cause nmap to send a TCP SYN packet to port 443 of the target, as well as a TCP ACK (or TCP SYN if not run as root) packet to port 80 of the target.*
+
 
 ## Flags to get more details
 --reason - gives us the explicit reason why Nmap concluded that the system is up or a particular port is open. 
@@ -415,9 +437,15 @@ $ sudo nmap -sS -n --script "http-date" <IP>
 ```
 `http-date` - retrieve the http server date and time
 
-
-
-
+Some of the most useful script categories:
+* safe:- Won't affect the target
+* intrusive:- Not safe: likely to affect the target
+* vuln:- Scan for vulnerabilities
+* exploit:- Attempt to exploit a vulnerability
+* auth:- Attempt to bypass authentication for running services (e.g. Log into an FTP server anonymously)
+* brute:- Attempt to bruteforce credentials for running services
+* discovery:- Attempt to query running services for further information about the network (e.g. query an SNMP server).
+More -> https://nmap.org/book/nse-usage.html
 
 
 
