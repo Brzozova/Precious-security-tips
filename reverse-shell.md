@@ -4,6 +4,9 @@ Hacker's machine acts as a server.
 It opens a communication channel on a port and waits for incoming connections. 
 Victim's machine acts as a client and initiates a connection to hackers's listening server.
 
+Reverse Shell Cheat Sheet: https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+
+---
 ## PHP Reverse Shell
 
 ### Script
