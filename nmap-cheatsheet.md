@@ -159,6 +159,7 @@ Many firewalls are configured to drop incoming TCP packets to blocked ports whic
 
 *Note: RFC 793 mandates that network hosts respond to malformed packets with a RST TCP packet for closed ports, and don't respond at all for open ports; this is not always the case in practice. In particular Microsoft Windows (and a lot of Cisco network devices) are known to respond with a RST to any malformed TCP packet -- regardless of whether the port is actually open or not. This results in all ports showing up as being closed.*
 
+Link: https://nmap.org/book/man-bypass-firewalls-ids.html
 
 ### Null Scan
 
